@@ -22,6 +22,11 @@ function Person(name){
 	this.name = name;
 }
 
+const newProtoWay = {
+	name: "the prototype property",
+	__proto__: personPrototype2,
+}
+
 ////////////////////////////// logs
 console.log("jhon.__proto__", jhon.__proto__);						// [Object: null prototype] {}
 console.log("jhon.__proto__.__proto__", jhon.__proto__.__proto__);	// null
@@ -86,8 +91,19 @@ merli.toString = () => "My name is " + merli.name;
 
 console.log("After shadowing:", merli.toString());	// My name is merli
 
+console.log();
 
+console.log("Calling on .__proto__ with syntax constructs for setting the [[Prototype]] property");
+newProtoWay.greet();	// hello i'm the prototype property
+console.log("newProtoWay.__proto__ ->", newProtoWay.__proto__);						// { greet: [Function: greet] }
+console.log("newProtoWay.__proto__.__proto__ ->", newProtoWay.__proto__.__proto__);	// [Object: null prototype] {}
+console.log("newProtoWay.__proto__.__proto__.__proto__ ->", newProtoWay.__proto__.__proto__.__proto__);	// null
 
+console.log();
+
+console.log("Calling on .__proto__ with Object.setPrototypeOf() for setting the [[Prototype]] property");
+Object.setPrototypeOf(newProtoWay, personPrototype);
+newProtoWay.greet();	// hello
 
 
 

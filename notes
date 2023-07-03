@@ -64,7 +64,7 @@ Object prototypes
 	Prototypes are the mechanism by which JavaScript objects inherit features from one another.
 
 The prototype chain
-	Every object in JavaScript has a built-in property, which is called its prototype (the name is actually __proto__ by convention). The prototype is itself an object, so the prototype will have its own prototype, making what's called a prototype chain. The chain ends when we reach a prototype that has null for its own prototype.
+	Every object in JavaScript has a built-in property, which is called [[Prototype]]. But this property is hidden, so you can only access it with certain words / methods (see "Setting a prototype" below). The prototype is itself an object, so the prototype will have its own prototype, making what's called a prototype chain. The chain ends when we reach a prototype that has null for its own prototype.
 	When accessing a property of an object: if the property can't be found in the object itself, the prototype is searched for the property. If it still can't be found, then the prototype's prototype is searched, and so on until the property is found or the end of the chain is reached (undefined is returned).
 	Object.prototype is the most basic prototype, that all objects have by default. The prototype of Object.prototype is null (end of the chain).
 	It's possible to mutate any member of the chain or even swap out the prototype at runtime, so concepts like static dispatching (extra below) don't exist in JavaScript.
@@ -81,31 +81,75 @@ Shadowing properties
 			obj.toString = () => "Name:" + obj.name; -> obj.toString() = Name: Jhon
 
 Setting a prototype
-	There are two main ways to do it: Object.create() and constructors.
+	There are a lot of ways to do it: Object.create() and constructors.
+		Using syntax constructs you can directly set the property __proto__ to a value (supported in all modern engines).
+			const p = { b: 2, __proto__: o };
+		When you call a function as a constructor, this property is set as the prototype of the newly constructed object.
+			const personPrototype = {greet() {console.log("hello my name is", this.name);}};
+			function Person (name) {this.name = name;}
 		Object.create() creates a new object and lets you specify an object that will be the new object's prototype.
 			const personPrototype = {greet() {console.log("hello");}};
 			const carl = Object.create(personPrototype);
 			carl.greet() -> hello
-		When you call a function as a constructor, this property is set as the prototype of the newly constructed object
-			const personPrototype = {greet() {console.log("hello my name is", this.name);}};
-			function Person (name) {this.name = name;}
 			Object.assign(Person.prototype, personPrototype) or Person.prototype.greet = personPrototype.greet
 			Now every time a Person object is created (new Person("name")) it will have the .greet() method
-		It's common to see this pattern, in which methods are defined on the prototype, but data properties are defined in the constructor.
-		Properties that are defined directly in the object, are called "own properties", and you can check whether a property is an own property using Object.hasOwn():
-			const irma = new Person("Irma");
-			console.log(Object.hasOwn(irma, "name")); -> true
-			console.log(Object.hasOwn(irma, "greet")); -> false
+		With classes, since the actual implementation of classes inheritance is with this prototype model:
+			class Square { constructor(size) {this.size = size;}}
+			class FilledSquare { constructor(size, color) {this.size = size; this.color = color;}}
+			const fs = new FilledSquare(5, "blue"); -> fs ---> FilledSquare.prototype ---> Square.prototype ---> Object.prototype ---> null
+		With Object.setPrototypeOf() you can mutate the [[Prototype]] internal property of an existing object.
+			const obj = { a: 1 };
+			const anotherObj = { b: 2 };
+			Object.setPrototypeOf(obj, anotherObj);
+		All objects inherit the Object.prototype.__proto__ setter, which can be used to set the [[Prototype]] of an existing object (deprecated, you should almost always use Object.setPrototypeOf instead.)
+			obj.__proto__ = somePrototype;
+	It's common to see this pattern, in which methods are defined on the prototype, but data properties are defined in the constructor.
+	Properties that are defined directly in the object, are called "own properties", and you can check whether a property is an own property using Object.hasOwn():
+		const irma = new Person("Irma");
+		console.log(Object.hasOwn(irma, "name")); -> true
+		console.log(Object.hasOwn(irma, "greet")); -> false
 
 Prototypes and inheritance
 	Prototypes support a version of inheritance. If two objects have another one prototypes, then they can inherit the common properties, while adding and redefining those properties which need to differ (see Prototypal Inheritance below).
 *****************************************************************************************************************************************************
 
 
+*****************************************************************************************************************************************************
+Prototypal Inheritance
+	With the prototypical inheritance model is fairly trivial to build a classic model on top of a prototypical model. That's actually how classes are implemented.
+	Classes are now widely adopted, but they do not bring a new inheritance pattern, they just abstract most of the prototypical mechanism away.
+
+Inheritance with the prototype chain
+	Inheriting properties
+		
+		
+		
+		
+
+	Inheriting methods
+		
+		
+		
+		
+		
+		
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+*****************************************************************************************************************************************************
 
 
 
