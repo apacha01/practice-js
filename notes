@@ -89,7 +89,7 @@ Setting a prototype
 		When you call a function as a constructor, this property is set as the prototype of the newly constructed object
 			const personPrototype = {greet() {console.log("hello my name is", this.name);}};
 			function Person (name) {this.name = name;}
-			Object.assign(Person.prototype, personPrototype) or Person.prototype.greet = personPrototype.greet (may replace prototype for __proto__)
+			Object.assign(Person.prototype, personPrototype) or Person.prototype.greet = personPrototype.greet
 			Now every time a Person object is created (new Person("name")) it will have the .greet() method
 		It's common to see this pattern, in which methods are defined on the prototype, but data properties are defined in the constructor.
 		Properties that are defined directly in the object, are called "own properties", and you can check whether a property is an own property using Object.hasOwn():
