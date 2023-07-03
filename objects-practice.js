@@ -65,7 +65,11 @@ console.log("martin.__proto__.__proto__.__proto__", martin.__proto__.__proto__._
 
 console.log();
 
-Object.assign(Person.__proto__, personPrototype2);	// does nothing
+
+Object.assign(Person.__proto__, personPrototype2);	// does nothing. Explained in notes: __proto__ should not be confused with 
+// the func.prototype property of functions, which instead specifies the [[Prototype]] to be assigned to all instances 
+// of objects created by the given function when used as a constructor
+//	console.log("Person.__proto__ -> ", Person.__proto__);	// {}
 Object.assign(Person.prototype, personPrototype2);	// works fine
 
 const merli = new Person("merli");
@@ -80,16 +84,25 @@ console.log("Shadowing property toString()");
 console.log("Before shadowing:", merli.toString());	// [object Object]
 
 // V1
-merli.toString = () => "My name is " + merli.name;
+merli.toString = () => "My name is " + merli.name;	// My name is merli
 
 // V2
-// merli.toString = () => "My name is " + this.name;	// My name is undefined ???
+// merli.toString = () => "My name is " + this.name;	// My name is undefined
 
 // V3
 // function getName (obj) {"My name is " + obj.name;}
-// merli.toString = () => getName(this);				// My name is undefined ???
+// merli.toString = () => getName(this);				// My name is undefined
 
-console.log("After shadowing:", merli.toString());	// My name is merli
+// (also in notes) 
+// When an inherited function is executed, the value of "this" points to the inheriting object, 
+// not to the prototype object where the function is an own property.
+
+// V4
+// const getName = () => "My name is " + this.name;
+// merli.toString = () => {getName(); console.log(this)};	// "{}" (the empty object prototype of a new object/function)
+															// "My name is undefined"
+
+console.log("After shadowing:", merli.toString());
 
 console.log();
 

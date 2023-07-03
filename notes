@@ -92,7 +92,7 @@ Setting a prototype
 			const carl = Object.create(personPrototype);
 			carl.greet() -> hello
 			Object.assign(Person.prototype, personPrototype) or Person.prototype.greet = personPrototype.greet
-			Now every time a Person object is created (new Person("name")) it will have the .greet() method
+			Now every time a Person object is created (new Person("name")) it will have the .greet() method (__proto__ should not be confused with the func.prototype property of functions, which instead specifies the [[Prototype]] to be assigned to all instances of objects created by the given function when used as a constructor).
 		With classes, since the actual implementation of classes inheritance is with this prototype model:
 			class Square { constructor(size) {this.size = size;}}
 			class FilledSquare { constructor(size, color) {this.size = size; this.color = color;}}
@@ -119,17 +119,15 @@ Prototypal Inheritance
 	With the prototypical inheritance model is fairly trivial to build a classic model on top of a prototypical model. That's actually how classes are implemented.
 	Classes are now widely adopted, but they do not bring a new inheritance pattern, they just abstract most of the prototypical mechanism away.
 
+
 Inheritance with the prototype chain
 	Inheriting properties
-		
-		
-		
-		
-
+		In an object literal like { a: 1, b: 2, __proto__: c }, the value c (has to be null or an object) will become the [[Prototype]] of the object, while the other keys (a & b) will become the own properties of the object.
+		Setting a property to an object creates an own property.
 	Inheriting methods
-		
-		
-		
+		JS doesn't have "methods" like class-based languages define them. In JS, any function can be added to an object in the form of a property.
+		An inherited function acts just as any other property.
+		When an inherited function is executed, the value of "this" points to the inheriting object, not the prototype object where the function is an own property.
 		
 		
 		
