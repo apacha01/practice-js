@@ -78,7 +78,7 @@ Shadowing properties
 	This is when you define a property in an object, when a property with the same name is defined in the object's prototype.
 	Example: (Object.prototype has the toString() method)
 			let obj = {name: "Jhon", greet {console.log("hello")} } -> obj.toString() = [object Object]
-			obj.toString = {console.log("Name:", obj.name)} -> obj.toString() = Name: Jhon
+			obj.toString = () => "Name:" + obj.name; -> obj.toString() = Name: Jhon
 
 Setting a prototype
 	There are two main ways to do it: Object.create() and constructors.

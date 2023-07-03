@@ -51,7 +51,7 @@ peter.greet();	// hello i'm peter
 
 console.log();
 
-console.log("Creating objects martin and assigning prototypes");
+console.log("Creating objects martin and merli and assigning prototypes");
 const martin = new Person("martin")
 console.log(martin.name);
 console.log("martin.__proto__", martin.__proto__);											// {}
@@ -69,8 +69,13 @@ console.log("merli.__proto__", merli.__proto__);											// { greet: [Function
 console.log("merli.__proto__.__proto__", merli.__proto__.__proto__);						// [Object: null prototype] {}
 console.log("merli.__proto__.__proto__.__proto__", merli.__proto__.__proto__.__proto__);	// null
 
+console.log();
 
-
+console.log("Shadowing property toString()");
+console.log("Before shadowing:", merli.toString());	// [object Object]
+merli.toString = () => "My name is " + merli.name;
+// merli.toString = () => "My name is " + this.name;	// My name is undefined ???
+console.log("After shadowing:", merli.toString());	// My name is merli
 
 
 
