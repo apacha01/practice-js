@@ -73,11 +73,18 @@ console.log();
 
 console.log("Shadowing property toString()");
 console.log("Before shadowing:", merli.toString());	// [object Object]
+
+// V1
 merli.toString = () => "My name is " + merli.name;
+
+// V2
 // merli.toString = () => "My name is " + this.name;	// My name is undefined ???
+
+// V3
+// function getName (obj) {"My name is " + obj.name;}
+// merli.toString = () => getName(this);				// My name is undefined ???
+
 console.log("After shadowing:", merli.toString());	// My name is merli
-
-
 
 
 
