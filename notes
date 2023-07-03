@@ -186,14 +186,42 @@ Type Casting
 
 *****************************************************************************************************************************************************
 Data Structures
+	Keyed Collections: collections of data which are indexed by a key.
+		Maps
+			Simple key/value object and iteratetable in insertion order.
+			You can use a for...of loop to return an array of [key, value] for each iteration.
+			Traditionally, objects have been used to map strings to values. Map objects, however, have a few more advantages:
+				The keys of an Object are Strings or Symbols, where they can be of any value for a Map.
+				You can get the size of a Map easily, while you have to manually keep track of size for an Object.
+				The iteration of maps is in insertion order of the elements.
+				An Object has a prototype, so there are default keys in the map. (This can be bypassed using map = Object.create(null).)
+		WeakMaps
+			Collection of key/value pairs whose keys must be objects or non-registered symbols, with values of any type, and which does not create strong references to its keys. i.e. an object's presence as a key in a WeakMap does not prevent the object from being garbage collected.
+			Once an object used as key has been collected, its value in any WeakMap becomes candidate for garbage collection as well.
+			A WeakMap doesn't allow observing the liveness of its keys, which is why it doesn't allow enumeration. So there is no method to obtain a list of the keys in a WeakMap.
+		Sets
+			Collections of unique values of any type.
+			You can iterate its elements in insertion order.
+			Converting between Array and Set: use Array.from or the spread syntax to go from Set to Array, or the Set to go from Array to Set.
+		WeakSets
+			Collections of garbage-collectable values, including only objects and non-registered symbols.
+			If there is no other reference to an object stored in the WeakSet, they can be garbage collected.
+			WeakSets are not enumerable.
+		Both the key equality of Maps and the value equality of Sets are based on the SameValueZero algorithm (see Equality Comparisons below).
+
+	Indexed Collections: collections of data which are ordered by an index value.
+		Arrays
+*****************************************************************************************************************************************************
+
+
+*****************************************************************************************************************************************************
+Equality Comparisons
+
+
 
 
 
 *****************************************************************************************************************************************************
-
-
-
-
 
 
 
