@@ -1,10 +1,137 @@
 https://roadmap.sh/javascript
 
 
-***************************************************************************************************************************************
+*****************************************************************************************************************************************************
 Primitives:
 	All the normal (bigint, boolean, etc...)
 	undefined: default value for variables declared.
 	Symbol: built-in object whose constructor returns a symbol that's guaranteed to be unique (often used to add unique property keys to an object that won't collide with keys any other code might add to the object). Every Symbol() call is guaranteed to return a unique Symbol. Every Symbol.for("key") call will always return the same Symbol for a given value of "key". Symbols are garbage collectable. To create Symbols available across files and even across realms (each of which has its own global scope), use the methods Symbol.for() and Symbol.keyFor() to set and retrieve Symbols from the global Symbol registry.
+*****************************************************************************************************************************************************
 
-***************************************************************************************************************************************
+
+*****************************************************************************************************************************************************
+Objects
+
+Generalities
+	Objects are used to store keyed collections of various data and complex entities.
+	Can be created with "{ ... }" (literal) or "new Object()" (constructor) with an optional list of properties (“key: value” pair) comma separated.
+	Property values are accessible using the dot notation: object.property
+	To remove a property, use the delete operator: delete object.property;
+	Multiword property names are posible, but must be quoted. For this, the dot access doesn’t work: object.multiword property -> error. So use object["multiword property"]
+	Square brackets also provide a way to obtain the property name as the result of any expression: let key = "likes birds"; user[key] = true; The dot notation cannot be used in a similar way: let key = "name"; console.log(user.key) -> undefined
+
+Computed properties
+	When you use square brackets in an object literal, when creating an object:
+		let fruit = "apple";
+		let bag = { [fruit]: 5, };
+		bag.apple -> 5
+	Computed properties means that, if [fruit] is used, the property name should be taken from fruit.
+	Essentially, that works the same as:
+		let fruit = "apple";
+		let bag = {};
+		bag[fruit] = 5;
+
+Property value shorthand
+	The use-case of making a property from a variable is so common, that there’s a special "property value shorthand" to make it shorter.
+	Instead of {name: name, age: age,} -> {name, age}
+
+Property names limitations
+	A variable cannot have a name equal to one of the language-reserved words, but for an object property, there’s no such restriction.
+	Other types are automatically converted to strings. (so you can write 0: "..." instead of "0":"...").
+	There’s a minor gotcha with a special property named __proto__. We can’t set it to a non-object value. (See "Object prototypes" below)
+
+Property existence test, “in” operator
+	It’s possible to access any property. There's no error if the property doesn’t exist it just returns undefined.
+	So there’s a special operator "in" for checking if a property exists. The syntax is: "key" in object (if quotes ommited, the var should contain the actual name to be tested)
+	On the left side of in there must be a property name, on the right is the object.
+
+The "for in" loop
+	To walk over all keys of an object, there exists a special form of the loop: for in. Syntax is: for key in object {...}
+	Example:
+		for (let key in user) {
+			key			-> name, age, etc
+			user[key]	-> "Jhon Doe", 35, etc
+		}
+
+Ordered like an object
+	Are objects ordered? The short answer is: “ordered in a special fashion”: integer properties (a string that can be converted to-and-from an integer without a change) are sorted, others appear in creation order.
+	If the keys are non-integer, then they are listed in the creation order.
+*****************************************************************************************************************************************************
+
+
+*****************************************************************************************************************************************************
+Object prototypes
+	Prototypes are the mechanism by which JavaScript objects inherit features from one another.
+
+The prototype chain
+	Every object in JavaScript has a built-in property, which is called its prototype (the name is actually __proto__ by convention). The prototype is itself an object, so the prototype will have its own prototype, making what's called a prototype chain. The chain ends when we reach a prototype that has null for its own prototype.
+	When accessing a property of an object: if the property can't be found in the object itself, the prototype is searched for the property. If it still can't be found, then the prototype's prototype is searched, and so on until the property is found or the end of the chain is reached (undefined is returned).
+	Object.prototype is the most basic prototype, that all objects have by default. The prototype of Object.prototype is null (end of the chain).
+	It's possible to mutate any member of the chain or even swap out the prototype at runtime, so concepts like static dispatching (extra below) don't exist in JavaScript.
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------- Extra
+static dispatch is a form of polymorphism fully resolved during compile time. It is a form of method dispatch, which describes how a language or environment will select which implementation of a method or function to use.
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+Shadowing properties
+	This is when you define a property in an object, when a property with the same name is defined in the object's prototype.
+	Example: (Object.prototype has the toString() method)
+			let obj = {name: "Jhon", greet {console.log("hello")} } -> obj.toString() = [object Object]
+			obj.toString = {console.log("Name:", obj.name)} -> obj.toString() = Name: Jhon
+
+Setting a prototype
+	There are two main ways to do it: Object.create() and constructors.
+		Object.create() creates a new object and lets you specify an object that will be the new object's prototype.
+			const personPrototype = {greet() {console.log("hello");}};
+			const carl = Object.create(personPrototype);
+			carl.greet() -> hello
+		When you call a function as a constructor, this property is set as the prototype of the newly constructed object
+			const personPrototype = {greet() {console.log("hello my name is", this.name);}};
+			function Person (name) {this.name = name;}
+			Object.assign(Person.prototype, personPrototype) or Person.prototype.greet = personPrototype.greet (may replace prototype for __proto__)
+			Now every time a Person object is created (new Person("name")) it will have the .greet() method
+		It's common to see this pattern, in which methods are defined on the prototype, but data properties are defined in the constructor.
+		Properties that are defined directly in the object, are called "own properties", and you can check whether a property is an own property using Object.hasOwn():
+			const irma = new Person("Irma");
+			console.log(Object.hasOwn(irma, "name")); -> true
+			console.log(Object.hasOwn(irma, "greet")); -> false
+
+Prototypes and inheritance
+	Prototypes support a version of inheritance. If two objects have another one prototypes, then they can inherit the common properties, while adding and redefining those properties which need to differ (see Prototypal Inheritance below).
+*****************************************************************************************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
