@@ -4,6 +4,7 @@ let abInt8 = new Int8Array(arrBuff);	// Int8 view on buffer
 let abInt16 = new Int16Array(arrBuff);	// Int16 view on buffer
 let f32 = new Float32Array(arrBuff);	// Float32 view on buffer
 let f64 = new Float64Array(arrBuff);	// Float64 view on buffer
+let dv = new DataView(arrBuff);			// DataView for the buffer
 let abArray;	// Array object to transform from views
 
 
@@ -14,9 +15,9 @@ console.log("setting abInt8[0] = 32, abInt8[2] = 1, abInt8[2] = 12 ...");
 abInt8[0] = 32;
 abInt8[1] = 1;
 abInt8[2] = 12;
-// --------------- 16 -------------- - --------------- 16 -------------- - --------------- 16 -------------- Little Endian
-//			abInt16[0] = 8193		 - 			abInt16[1] = 3072		 - 			abInt16[2] = 0
 // --------------- 16 -------------- - --------------- 16 -------------- - --------------- 16 -------------- Big Endian
+//			abInt16[0] = 8193		 - 			abInt16[1] = 3072		 - 			abInt16[2] = 0
+// --------------- 16 -------------- - --------------- 16 -------------- - --------------- 16 -------------- Little Endian
 //			abInt16[0] = 288		 - 			abInt16[1] = 12			 - 			abInt16[2] = 0
 // -------8------- - -------8------- - -------8------- - -------8------- - -------8------- - -------8-------
 // abInt8[0] = 32  - abInt8[1] = 1   - abInt8[2] = 12  - abInt8[3] = 0   - abInt8[4] = 0   - abInt8[5] = 0
@@ -35,14 +36,13 @@ console.log();
 console.log("Setting abInt8[3 - 7] (all remaining mem spaces) ...");
 
 // --------------- 16 -------------- - --------------- 16 -------------- - --------------- 16 --------------
-//	 		abInt16[1] = 3072		 - 			abInt16[2] = 256		 - 		abInt16[3] = 32768
+//	 		abInt16[1] = 3200		 - 			abInt16[2] = 256		 - 		abInt16[3] = 32768
 // --------------- 16 -------------- - --------------- 16 -------------- - --------------- 16 --------------
-// 	 		abInt16[1] = 12			 - 			abInt16[2] = 1			 - 		abInt16[3] = 128
+// 	 		abInt16[1] = 32780		 - 			abInt16[2] = 1			 - 		abInt16[3] = 128
 // -------8------- - -------8------- - -------8------- - -------8------- - -------8------- - -------8-------
 //  abInt8[2] = 12 - abInt8[3] = 128 -  abInt8[4] = 1  -  abInt8[5] = 0  - abInt8[6] = 128  - abInt8[7] = 0
 // --------------------------------------------------------------------- - ---------------------------------
 // 0 0 0 0 1 1 0 0 - 1 0 0 0 0 0 0 0 - 0 0 0 0 0 0 0 1 - 0 0 0 0 0 0 0 0 - 1 0 0 0 0 0 0 0 - 0 0 0 0 0 0 0 0
-
 
 abInt8[3] = 128;
 abInt8[4] = 1;
@@ -71,3 +71,18 @@ console.log("abInt16 when transformed to array (with abInt8[3] = 0) = ", abArray
 abInt8[3] = 128;
 abArray = Array.from(abInt16);
 console.log("abInt16 when transformed to array (with abInt8[3] = 128) = ", abArray);	// [ 288, -32756, 1, 128 ]
+
+
+console.log();
+
+console.log("Working with DataView and endianness");
+
+// let a = dv.getInt16(0, /*littleEndian = true*/true)
+// let b = dv.getInt16(0, /*littleEndian = false*/false)
+// console.log("Same raw data on:\n\tlittle endian = ", a, "\n\tbig endian = ", b);
+
+for (let i = 0; i < 8; i+=2) {
+	let a = dv.getInt16(i, true);
+	let b = dv.getInt16(i, false);
+	console.log("Same raw data (abInt16[", i / 2,"]) on:\n\tlittle endian = ", a, "\n\tbig endian = ", b);
+}
