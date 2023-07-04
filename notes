@@ -245,10 +245,18 @@ Data Structures
 
 *****************************************************************************************************************************************************
 Equality Comparisons
-	
-
-
-
+	There are four equality algorithms in JavaScript:
+		IsLooselyEqual: implemented with	==. This will perform a type conversion when comparing two things. (extra: NaN != NaN, and -0 == +0)
+		IsStrictlyEqual: implemented with	===. Same comparison as double equals (including for NaN, -0, and +0) but without type conversion.
+		SameValue: implemented with			Object.is(). Determines whether two values are functionally identical in all contexts (no type conversion and no NaN == NaN, and -0 != +0).
+		SameValueZero: can be implemented with custom code (not implemented in JS). It only differs from strict equality by treating NaN as equal, and only differs from same-value equality by treating -0 as equivalent to 0.
+			function sameValueZero(x, y) {
+				if (typeof x === "number" && typeof y === "number") {
+					// x and y are equal (may be -0 and 0) or they are both NaN
+					return x === y || (x !== x && y !== y);
+				}
+				return x === y;
+			}
 
 *****************************************************************************************************************************************************
 
