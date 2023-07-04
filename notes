@@ -210,13 +210,42 @@ Data Structures
 		Both the key equality of Maps and the value equality of Sets are based on the SameValueZero algorithm (see Equality Comparisons below).
 
 	Indexed Collections: collections of data which are ordered by an index value.
-		Arrays
+		Arrays (omiting usual info common to every prog. lang.)
+			You can create an array in 3 ways:
+				new Array(1,2...)
+				Array(1,2...)
+				[1,2...]			(this syntax is called "array literal" or "array initializer")
+			This creates an array with only one element, the number 42: const arr = [42];
+			This creates an empty array with length 42: const arr = []; arr.length = 42;
+			Writing a value that is shorter than the number of stored items truncates the array. Writing 0 empties it entirely.
+			The forEach() method provides a way of iterating over an array: arr.forEach(...)
+			Arrays can contain "empty slots" (this are called "sparse arrays"), which are not the same as slots filled with the value undefined.
+			Arrays can also be used like objects, to store related information: const arr = [1, 2, 3]; arr.property = "value";
+			Some objects look and behave like arrays on the surface but do not share all of their methods. This are array-like objects.
+			Array methods cannot be called directly on array-like objects. But you can call them indirectly using Function.prototype.call().
+				Array.prototype.forEach.call(yourArrayLikeObject, (item) => { ... })
+			Array prototype methods can be used on strings as well, since they provide sequential access to their characters.
+		Typed Arrays(similar to arrays in many ways)
+			Array-like objects that provide a mechanism for reading and writing raw binary data in memory buffers.
+			Each entry in a typed array is a raw binary value in one of the supported formats, from 8-bit integers to 64-bit floating-point numbers.
+			Calling Array.isArray() on a typed array returns false.
+			To achieve maximum flexibility and efficiency, JavaScript typed arrays split the implementation into buffers and views.
+				A buffer (ArrayBuffer object) is an object representing a chunk of data; it has no format to speak of, and offers no mechanism for accessing its contents. To access it, you need to use a view. ArrayBuffer is a fixed-length binary data buffer.
+				A view provides a context, i.e data type; starting offset; number of elements, that turns the data into an actual typed array. This object access the buffer allowing you to read/write in it.
+			There are two types of views:
+				Views that act like single-type arrays to a segment of an ArrayBuffer. This ones have self-descriptive names and provide views for all the usual numeric types (like Uint8Array, Float32Array, etc). This typed arrays use the endianness of the CPU.
+				The DataView object that it is meant for handling heterogeneous data. the DataView object provides you a get/set API to read and write arbitrary data types at arbitrary byte offsets. This DataView object can be preset to use little or big endian format. Sice you don't know in wich endianness you recive raw data from the web, a rule of thumb is: upon receiving binary data from the web server, make one pass over it with a DataView.
+			There is one special typed array view, Uint8ClampedArray, which clamps (clamping values mean values below the min become min, values above the maximum become max) the values between 0 and 255 (used for canvas's ImageData).
+			You can create multiple views (even different ones) onto the same data.
+			To convert it back to a normal array you can use Array.from() (on the DataView) as well as the spread syntax ([...typedArray]).
+			Because Typed Array is raw memory, the JS engine can pass the memory directly to native libraries without having to convert the data to a native representation. As a result, typed arrays perform a lot better than arrays for passing data to WebGL and other APIs dealing with binary data.
+			To copy a typed array to another typed array, the fastest way is to use the typed array set method. (typedArray.set(anotherTypedArray)).
 *****************************************************************************************************************************************************
 
 
 *****************************************************************************************************************************************************
 Equality Comparisons
-
+	
 
 
 
