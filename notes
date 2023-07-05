@@ -344,16 +344,64 @@ Functions
 
 *****************************************************************************************************************************************************
 Strict Mode
-	
+	A way to opt-in to a restricted variant of JavaScript, thereby implicitly opting out of “sloppy mode”.
+	It isn’t just a subset: it intentionally has different semantics from regular code.
+	Strict mode code and non-strict mode code can coexist so that scripts can opt into strict mode incrementally.
+	Strict mode makes several changes to normal JS semantics:
+		Eliminates some JavaScript silent errors by changing them to throw errors.
+		Fixes mistakes that make it difficult for JavaScript engines to perform optimizations: strict mode code can sometimes run faster than identical code that’s not strict mode.
+		Prohibits some syntax likely to be defined in future versions of ECMAScript.
+	Strict mode applies to entire scripts or to individual functions. It doesn't apply to block statements enclosed in {} braces.
 
+	Invoking strict mode:
+		Strict mode for scripts: put "use strict"; before any other statements (top of the script).
+		Strict mode for functions: put "use strict"; in the function's body before any other statements (top of the function).
+			"use strict" can only be applied to functions with simple parameters. "use strict" in functions with rest, default or destructured parameters is a syntax error.
+		Strict mode for modules: contents of JS modules are automatically in strict mode, with no statement needed to initiate it.
+		Strict mode for classes: all parts of a class's body are strict mode code.
+
+	Changes in strict mode
+		changes converting mistakes into errors (as syntax errors or at runtime).
+		changes simplifying how variable references are resolved.
+		changes simplifying eval and arguments.
+		changes making it easier to write "secure" JavaScript.
+		changes anticipating future ECMAScript evolution.
+		makes it impossible to accidentally create global variables. Assignments that would accidentally create global variables throw ReferenceError
+		makes assignments which would silently fail (non-writable data, new property on a non-extensible object, etc) to throw an exception.
+		attempts to delete a non-configurable or undeletable property throw TypeError. Also forbids deleting plain names (syntax error).
+		requires that function parameter names be unique.
+		forbids a 0-prefixed octal literal or octal escape sequence.
+		forbids setting properties on primitive values (TypeError).
+		Duplicate property names are considered a SyntaxError prior to ES2015. It no longer throws an error.
+		simplifies how variable names map to particular variable definitions in the code (allowing some engine optimization).
+		prohibits with.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------- Extra
+with keyword (is deprecated): The with statement extends the scope chain for a statement.
+	Syntax: with (expresion) statement; // parentheses required
+	There are two types of identifiers: qualified and unqualified. Unqualified identifier is one that does not indicate where it comes from. foo -> unquilified; foo.bar -> bar is qualified. Unqualified identifiers are resolved by searching the scope chain for a variable with that name. Qualified identifiers are resolved by searching the prototype chain of an object for a property with that name. The with statement adds the given object to the head of this scope chain during the evaluation of its statement body. Every unqualified name would first be searched within the object (through a in check) before searching in the upper scope chain.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+		eval does not introduce new variables into the surrounding scope (eval() function evaluates JavaScript code represented as a string and returns its completion value i.e. eval(script), where script is js code).
+		block-scoped function declarations (divergent in sloppy mode) are explicitly specified in strict mode.
+		eval and arguments can't be bound or assigned in language syntax.
+		doesn't sync indices of the arguments object with each parameter binding (so arguments is like a copy of the params values at the moment the function was called, modifyng the params doesn't modify the arguments object).
+		values passed as "this" to a function are not forced into being an object (if unspecified, "this" is undefined, not globalThis).
+		it's no longer possible to "walk" the JavaScript stack.
+		arguments.callee is no longer supported.
+		it has some "Future-proofing JavaScript" with reserved words that aren't actually implemented yet (like interface, package, private, etc).
+
+	Transitioning to strict mode
+		You can migrate a codebase to strict mode by first adding "use strict" to a piece of source code, and then fixing all execution errors
 *****************************************************************************************************************************************************
 
 
+*****************************************************************************************************************************************************
+The "this" keyword
+	
 
 
 
-
-
+*****************************************************************************************************************************************************
 
 
 
