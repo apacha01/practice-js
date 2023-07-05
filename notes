@@ -332,7 +332,7 @@ Functions
 			check example here: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures#emulating_private_methods_with_closures
 			You can create a shared lexical environment for mutliple functions. Use an IIFE to have some private vars and methods and return the public functions you want to be used outside of that function. This way, those public functions (the ones you returned) have access to the private functions within the IIFE.
 			Using closures in this way provides benefits that are normally associated with object-oriented programming. In particular, data hiding and encapsulation.
-		Closure scope chain: 
+		Closure scope chain:
 			Every closure has 3 scopes:
 				Local scope (Own scope)
 				Enclosing scope (can be block, function, or module scope)
