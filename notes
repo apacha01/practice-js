@@ -274,19 +274,79 @@ Expressions and Operators
 
 *****************************************************************************************************************************************************
 Functions
-	
+	All the typcal syntax as most lang.
+	Arrow functs: (params) => {...}
+	Default params: function name (a, b = defaultValue) {...}. If not specified, undefined.
+	Rest parameters: this syntax allows a function to accept an indefinite number of arguments as an array.
+		function name (...theArgs) {...}. theArgs is an array.
 
+	IIFE (Immediately Invoked Function Expression): function that runs as soon as it's defined. Enclose it in () and call it. (function () {...}) ();
+		Contains two major parts:
+			The anonymous function with lexical scope enclosed within the Grouping Operator "()". This prevents accessing variables within the IIFE idiom as well as polluting the global scope.
+			The expression () through which the JS engine will directly interpret the function.
+		Some use cases:
+			Avoid polluting the global namespace: If some initiation code won't need to be use again, use the IIFE pattern. Cause an app could include many functions and global variables from different source files.
+			Execute an async function: An async IIFE allows you to use await and for-await.
+			The module pattern: create private and public variables and methods.
+				i.g. const something = (param) => ((paramCopy) => { any var or method here is private })(param);
+			For loop with var before ES6: before "let" and "const" this could be seen (old code) to replace the function scope variables.
+
+	Arguments Object
+		"arguments" is an array-like object accessible inside functions that contains the values of the arguments passed to that function.
+			i.g. function name (a, b, c) {arguments[0] = a; arguments[1] = b; arguments[2] = c}
+		local variable available within all non-arrow functions.
+		a function of indefinite arity is a variadic function. The arguments object is useful for variadic functions.
+		If a function has no rest, default, or destructured parameters, arguments[i] can be use to sync the new value of parameters.
+		Functions that are passed rest, default or destructured parameters will not sync new values assigned to parameters in the body of the function with the arguments object. Instead, the arguments object in non-strict functions with complex parameters will always reflect the values passed to the function when the function was called.
+
+	Scope and function stack
+		Scope: A space or environment in which a particular variable or function can be accessed or used. The following scopes can be found in JS:
+			Global scope: The default scope for all code running in script mode.
+			Module scope: The scope for code running in module mode.
+			Function scope: The scope created with a function.
+			Block scope: The scope created with a pair of curly braces (a block).
+		Variables declared with let or const belong to block scope.
+		Function Stack (Call stack): The function stack is how the interpreter keeps track of its place in a script that calls multiple functions, like which function is currently executing and which functions within that function are being called.
+
+	Recursion: recursion is when a function invokes itself.
+
+	Closures
+		Combination of a function bundled together (enclosed) with references to its surrounding state (the lexical environment). In other words, a closure gives you access to an outer function's scope from an inner function.
+		Lexical scoping
+			Lexical environment for a function refers to the environment enclosing that function’s definition in the source code.
+			The lexical environment is determined once and then fixed for the entire course of the program. This is why JS is called a statically-scoped language.
+			Lexical scoping describes how a parser resolves variable names when functions are nested. This is how a function can use a local variable of a parent function even if not declared within itself.
+		Functions in JavaScript form closures.
+		Another definition: A closure is the combination of a function and the lexical environment within which that function was declared. This environment consists of any local variables that were in-scope AT THE TIME THE CLOSURE WAS CREATED. This allows the following example:
+											function makeAdder(x) {
+												return function (y) {
+													return x + y;
+												};
+											}
+											const add5 = makeAdder(5);
+											console.log(add5(2));		// 7-> Works
+			The instance of the anonym. function maintains a reference to its lexical environment, within which the variable x exists.
+			If we were to make another function: const add10 = makeAdder(10); then the function is the same, but both have different lexical environments. In add5's lexical environment, x is 5, while in the lexical environment for add10, x is 10.
+		You can use a closure anywhere that you might normally use an object with only a single method.
+		Emulating private methods with closures:
+			check example here: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures#emulating_private_methods_with_closures
+			You can create a shared lexical environment for mutliple functions. Use an IIFE to have some private vars and methods and return the public functions you want to be used outside of that function. This way, those public functions (the ones you returned) have access to the private functions within the IIFE.
+			Using closures in this way provides benefits that are normally associated with object-oriented programming. In particular, data hiding and encapsulation.
+		Closure scope chain: 
+			Every closure has 3 scopes:
+				Local scope (Own scope)
+				Enclosing scope (can be block, function, or module scope)
+				Global scope
+			In the case where the outer function is itself a nested function, access to the outer function's scope includes the enclosing scope of the outer function, effectively creating a chain of function scopes.
+		Each function instance manages its own scope and closure. Therefore, it is unwise to unnecessarily create functions within other functions if closures are not needed for a particular task, as it will negatively affect script performance.
 *****************************************************************************************************************************************************
 
 
+*****************************************************************************************************************************************************
+Strict Mode
+	
 
-
-
-
-
-
-
-
+*****************************************************************************************************************************************************
 
 
 
