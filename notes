@@ -257,8 +257,38 @@ Equality Comparisons
 				}
 				return x === y;
 			}
+*****************************************************************************************************************************************************
+
 
 *****************************************************************************************************************************************************
+Expressions and Operators
+	All the normal ones in every lang.
+	Worth mention:
+		Comma operator: evaluates both of its operands and returns the value of the last operand. Primarily used inside a for loop (regarded bad style to use it elsewhere. Often two separate statements can and should be used instead).
+		Unary operators: operation with only one operand. i.g. delete, typeof, void...
+		Relational operators: compares its operands and returns a Boolean value based on whether the comparison is true.
+			in: returns true if the specified property is in the specified object.
+			instanceof: returns true if the specified object is of the specified object type.
+*****************************************************************************************************************************************************
+
+
+*****************************************************************************************************************************************************
+Functions
+	
+
+*****************************************************************************************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
