@@ -415,7 +415,7 @@ The "this" keyword
 			call: dogObject.bark.call(catObject)
 			apply: dogObject.bark.apply(catObject)
 			bind: let catBark = dogObject.bark.bind(catObject); catBark();
-		The central benefit is that it allows you to forego inheritance. There’s no reason to force a class to inherit from another if it's only to grant instances of the child class access to a single method. It also keeps you from having to write the same function twice and maintain it in two places. (ASD test: Although you could just do: Cat.prototype.bark = Dog.prototype.bark).
+		The central benefit is that it allows you to forego inheritance. There’s no reason to force a class to inherit from another if it's only to grant instances of the child class access to a single method. It also keeps you from having to write the same function twice and maintain it in two places.
 		The most important practical application of function borrowing is for native methods, specifically, Array.prototype.slice. There are several list-like data structures that aren’t arrays, and it’s useful to be able to treat them as arrays and operate on them as such.
 *****************************************************************************************************************************************************
 
