@@ -89,7 +89,7 @@ console.log("Starting tests...");
 			[Function: f2]
 		2
 	
-	ASD: so the await is only for the scope where it is called?
+	so the await is only for the scope where it is called?
 	Expected output:
 		First
 		[Function: f1]
@@ -97,6 +97,8 @@ console.log("Starting tests...");
 		First
 		[Function: f2]
 		2
+	MDN: Using await pauses the execution of its surrounding async function until the promise is settled. 
+					 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  */
 
 console.log("Non Promise Test:");
