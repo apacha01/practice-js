@@ -422,15 +422,160 @@ The "this" keyword
 
 *****************************************************************************************************************************************************
 Asyncronous JS
-	
+	Asynchronous programming is a technique that lets your program start a task and still be able to be responsive to other events while that task runs, rather than having to wait until that task has finished.
 
+	setTimeout(): runs a function once after the interval of time.
+	setInterval(): runs a function repeatedly, starting after the interval of time, then repeating continuously at that interval.
+
+	Event handlers
+		a function that will be called, not right away, but whenever the event happens (a specific type of callback).
+		event handlers are really a form of asynchronous programming.
+
+	Callbacks
+		a function that's passed into another function, with the expectation that it will be called at the appropriate time.
+		callback-based code can get hard to understand when the callback itself has to call functions that accept a callback. Because we have to call callbacks inside callbacks, we get a deeply nested function, which is much harder to read and debug. This is sometimes called "callback hell" or the "pyramid of doom". For these reasons, most modern asynchronous APIs don't use callbacks. Instead, the foundation of asynchronous programming in JavaScript is the Promise.
+
+	Promises
+		an object returned by an asynchronous function, which represents the current state of the operation. The promise object provides methods to handle the eventual success or failure of the operation.
+		another definition: an object that represents the success or failure of a given operation, usually an asynchronous operation.
+		Promises are built upon the conventional try/catch model, and thus offers more convenience to developers in writing exception-handling code.
+		a promise is created with a function (called: the executor), as argument. Whenever the function was successfully finished, the promise is resolved, if the function was interrupted, threw an error or didn't finish, the promise is rejected.
+		Two arguments are passed to the executor:
+			a function to be called when the async operation completes: resolve().
+			a function to be called when the async operation fails: reject().
+		as soon as a promise is created using new Promise() along with a function as argument, this function is executed immediately by the promise.
+		States of a promise: since a promise "represents the current state of the operation", it has the following states:
+			pending: hasn't finished yet.
+			fulfilled: finished as a success.
+			rejected: finished as a failure.
+		when we call the Promise() constructor, it's set to "pending".
+		every promise object has a [[PromiseState]].
+		Value of a promise
+			when an asynchronous operation completes it is ready with some sort of data to be utilised for further actions.
+			a promise's value is set by passing an argument to the resolve() or the reject() function.
+				if the operation succeeds, this is the "result" of the operation.
+				if it fails, this is the "reason" for the failure.
+		The then() method
+			available to all promises via Promise.prototype, is used to execute a function when a promise is resolved or rejected.
+			it accepts two arguments:
+				a function to call once the promise is resolved: onFulfilled().
+				a function to call once the promise is rejected: onRejected().
+		The executor function
+			it has a synchronous nature
+			if Promise() is called without an executor, or if that executor is not a function, an exception is thrown.
+		every promise object internally maintains two callback queues (which fill when the then() method is used)
+			one holding all functions to fire on its resolution.
+			one holding all functions to fire on its rejection.
+
+	Chaining
+		refers to the notion of subsequently calling then() on the promise returned by then(). Possible since then() returns a new promise.
+		this return of a promise by then() is what enables subsequent calls to be made on its invocation expression; and thus chaining.
+		if then() is called while its promise is still unsettled, the callbacks are queued internally, after that a new promise is created; its reference saved internally in another queue; and finally returned by the method. this returned promise is given the name derived promise.
+		there are 3 options of a return for callbacks:
+			Returning a non-promise value: fulfills the corresponding derived promise with that value.
+			Throwing an exception: the returned promise is rejected with that reason. Consequently the derived promise is rejected that value.
+			Returning a promise: the promise returned by then() abides by the result of this promise (if fulfilled, the derived promise fulfills. if rejected, the derived promise rejects, if still pending, the derived promise is put on pending state).
+
+	Event Loop
+		JS has a runtime model based on an event loop, which is responsible for executing the code, collecting and processing events, and executing queued sub-tasks.
+		It got its name because of how it's usually implemented, which usually resembles:
+												while (queue.waitForMessage()) {
+													queue.processNextMessage();
+												}
+							(queue.waitForMessage() waits synchronously for a message to arrive )
+		Runtime understanding (theoretical model, JS engines implement and heavily optimize this):
+			Stack
+				Function calls form a stack of frames.
+				the arguments and local variables may continue to exist, as they are stored outside the stack, so they can be accessed by any nested functions long after their outer function has returned.
+			Heap
+				objects are allocated in a heap which is just a name to denote a large (mostly unstructured) region of memory.
+			Queue (message queue)
+				a list of messages to be processed. Each message has an associated function that gets called to handle the message.
+				Each message is processed completely before any other message is processed.
+				messages are added anytime an event occurs and there is an event listener attached to it.
+			Zero delays
+				Zero delay doesn't mean the call back will fire-off after zero milliseconds.
+				The execution depends on the number of waiting tasks in the queue.
+			Several runtimes communicating together
+				a web worker or a cross-origin iframe has its own stack, heap, and message queue. Two distinct runtimes can only communicate through sending messages via the postMessage. This method adds a message to the other runtime if the latter listens to message events.
+			Never blocking
+				the event loop never blocks. Handling I/O is typically performed via events and callbacks, so when the app is waiting for an XHR request to return or an IndexedDB query to return, it can still process other things like user input.
+			the event loop basically has one task: connecting the queue with the call stack if the call stack is empty.
+		On NodeJS:
+			is what allows Node.js to perform non-blocking I/O operations by offloading operations to the system kernel whenever possible.
+			event loop's order of operations (each one of these op. are called "phase"):
+											   ┌───────────────────────────┐
+											┌─>│           timers          │
+											│  └─────────────┬─────────────┘		┌──────────────────────────────┐
+											│  ┌─────────────┴─────────────┐		│ Each phase has a FIFO queue  │
+											│  │     pending callbacks     │		│ of callbacks to execute	   │
+											│  └─────────────┬─────────────┘		└──────────────────────────────┘
+											│  ┌─────────────┴─────────────┐
+											│  │       idle, prepare       │
+											│  └─────────────┬─────────────┘      ┌───────────────┐
+											│  ┌─────────────┴─────────────┐      │   incoming:   │
+											│  │           poll            │<─────┤  connections, │
+											│  └─────────────┬─────────────┘      │   data, etc.  │
+											│  ┌─────────────┴─────────────┐      └───────────────┘
+											│  │           check           │		┌────────────────────────────────────────────┐
+											│  └─────────────┬─────────────┘		│ any operation may schedule more operations │
+											│  ┌─────────────┴─────────────┐		│ and new events processed in the poll phase │
+											└──┤      close callbacks      │		│ are queued by the kernel					 │
+											   └───────────────────────────┘		└────────────────────────────────────────────┘
+				timers: executes callbacks scheduled by setTimeout() and setInterval().
+					A timer specifies the threshold after which a provided callback may be executed.
+					will run as early as they can be scheduled after the specified time has passed, however, OS scheduling or the running of other callbacks may delay them.
+					Technically, the poll phase controls when timers are executed. When the event loop enters the poll phase it will wait (if queue is empty) for the number of ms remaining until the soonest timer's threshold is reached.
+				pending callbacks: executes I/O callbacks deferred to the next loop iteration.
+					This phase executes callbacks for some system operations. i.g. some OS want to wait to report errors, this will be queued to execute in the pending callbacks phase.
+				idle, prepare: only used internally.
+				poll: retrieve new I/O events; execute I/O related callbacks (almost all); node will block here when appropriate.
+					The poll phase has two main functions:
+						1 Calculating how long it should block and poll for I/O.
+						2 Processing events in the poll queue.
+					When the event loop enters the poll phase:
+						If the poll queue is not empty, the event loop will iterate through its queue of callbacks executing them synchronously.
+						If the poll queue is empty but no timer is scheduled:
+							If scripts have been scheduled by setImmediate(), it'll end the poll and continue to the check phase.
+							If scripts haven't been scheduled by setImmediate(), it'll wait for callbacks to be added to the queue and execute them.
+						If the poll queue is empty and a timer is scheduled:
+							it'll wrap back to the timers phase to execute those timers' callbacks.
+				check: setImmediate() callbacks are invoked here.
+					This phase allows a person to execute callbacks immediately after the poll phase has completed.
+				close callbacks: some close callbacks.
+					If a socket or handle is closed abruptly, the 'close' event will be emitted in this phase.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------- Extra
+https://softwareengineering.stackexchange.com/questions/294346/c-runtime-and-runtime-linking -> nice runtimes explanation
+
+Nodejs documentation:
+
+setTimeout() vs setImmediate()
+	setImmediate() is designed to execute a script once the current poll phase completes.
+	setTimeout() schedules a script to be run after a minimum threshold in ms has elapsed.
+The main advantage to using setImmediate() over setTimeout() is setImmediate() will always be executed before any timers if scheduled within an I/O cycle, independently of how many timers are present.
+
+Understanding process.nextTick()
+	process.nextTick() is not technically part of the event loop. Regardless of the current phase of the event loop, the nextTickQueue will be processed after the current operation (defined as: a transition from the C/C++ handler, and handling the JS that needs to be executed) is completed.
+	any time you call process.nextTick() in a phase, all callbacks passed to this function will be resolved before the event loop continues.
+
+process.nextTick() vs setImmediate()
+	process.nextTick() fires immediately on the same phase
+	setImmediate() fires on the following iteration or 'tick' of the event loop
+	We recommend developers use setImmediate() in all cases because it's easier to reason about.
+	Why use process.nextTick()?
+		Allow users to handle errors, cleanup any then unneeded resources, or perhaps try the request again before the event loop continues.
+		At times it's necessary to allow a callback to run after the call stack has unwound but before the event loop continues.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
 *****************************************************************************************************************************************************
 
 
+*****************************************************************************************************************************************************
+Working with API's
 
 
 
-
+*****************************************************************************************************************************************************
 
 
 
