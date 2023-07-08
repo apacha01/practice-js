@@ -572,10 +572,86 @@ process.nextTick() vs setImmediate()
 
 *****************************************************************************************************************************************************
 Working with API's
+	API's are constructs made available in programming languages to allow developers to create complex functionality more easily. They abstract more complex code away from you, providing some easier syntax to use in its place.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------- Extra
+Library vs API
+	A library is a collection of functionality not making up an application of its own, but offered to application software to ease implementing some tasks.
+	The way of interacting with that library is defined by some API.
+	So there can be multiple version of a library (or implementation, from different vendors) with one same API to interact with them.
 
+Framework vs Library
+	The key difference between a library and a framework is "Inversion of Control".
+		When calling a method from a library, the developer is in control.
+		With a framework, the control is inverted: the framework calls the developer's code.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+	JS API's
+		client side js has many api's but generally fall into two categories:
+			Browser APIs: built into your web browser.
+			Third-party APIs: not built into the browser by default, and you have to retrieve their code (or information) from somewhere on the Web.
+
+	How do APIs work?
+		Generally api's have common features and similar themes to how they work:
+			They are based on objects
+				Your code interacts with APIs using JS objects, which serve as containers for the data (properties), and the functionality (methods) it makes available.
+			They have recognizable entry points
+				When using an API, you should make sure you know where the entry point is for the API.
+			They often use events to handle changes in state
+			They have additional security mechanisms where appropriate (e.g. some of the modern WebAPIs will only work on pages served over HTTPS).
+
+	Fetching data from the server
+		The main API here is the Fetch API. This enables JavaScript running in a page to make an HTTP request to a server to retrieve specific resources.
+		In the early days, this general technique was known as Asynchronous JavaScript and XML (Ajax), because it tended to request XML data.
+
+	XMLHttpRequest (XHR)
+		objects used to interact with servers.
+		used heavily in AJAX programming.
+		can be used to retrieve any type of data (not just XML), with protocols other than HTTP.
+		If the communication needs to involve receiving event data or message data, use server-sent events through the EventSource interface.
+		For full-duplex communication, WebSockets may be a better choice.
+
+	The Fetch API
+		considered a modern replacement for XMLHttpRequest.
+		it's a simpler API and has more features than XMLHttpRequest.
+		uses Request and Response objects.
+		the entry point to the Fetch API is a global function called fetch().
+		fetch() takes one mandatory argument, the path to the resource you want to fetch.
+		fetch() returns a promise (since it's an async api), that resolves to a Response object.
+		the response can be formatted into many different object, this are just examples:
+			.text(): plain text.
+			.json(): a json object.
+			.blob(): a blob (Blob is an abbreviation of "Binary Large Object" and can basically be used to represent large file-like objects).
+		You can create a request and response directly using the Request() and Response() constructors, but it's uncommon. These are more likely to be created as results of other API actions.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------- Extra
+Web Workers API
+	Web Workers makes it possible to run a script operation in a background thread separate from the main execution thread of a web application.
+	A worker is an object that runs a named JS file, that contains the code that will run in the worker thread.
+	you can run almost any code you like inside a worker thread. Some exceptions:
+		you can't directly manipulate the DOM from inside a worker.
+		you can't use some default methods and properties of the window object.
+	Data is sent between workers and the main thread via a system of messages — both sides send their messages using the postMessage() method, and respond to messages via the onmessage event handler.
+	There are a number of different types of workers:
+		Dedicated workers: are utilized by a single script. This context is represented by a DedicatedWorkerGlobalScope object.
+		Shared workers: can be utilized by multiple scripts running in different windows, IFrames, etc..., as long as they are in the same domain as the worker. These scripts must communicate via an active port.
+		Service Workers: essentially act as proxy servers that sit between web applications, the browser, and the network (when available). They are intended, among other things, to enable the creation of effective offline experiences, intercept network requests and take appropriate action based on whether the network is available, and update assets residing on the server. They also allow access to push notifications and background sync APIs.
+	methods are defined in WindowOrWorkerGlobalScope, and made available to workers through their own WorkerGlobalScope-derived contexts:
+		DedicatedWorkerGlobalScope for dedicated workers
+		SharedWorkerGlobalScope for shared workers
+		ServiceWorkerGlobalScope for service workers
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+*****************************************************************************************************************************************************
 
 
 *****************************************************************************************************************************************************
+Classes
+	
+
+*****************************************************************************************************************************************************
+
+
+
 
 
 
