@@ -265,7 +265,7 @@ Expressions and Operators
 	All the normal ones in every lang.
 	Worth mention:
 		Comma operator: evaluates both of its operands and returns the value of the last operand. Primarily used inside a for loop (regarded bad style to use it elsewhere. Often two separate statements can and should be used instead).
-		Unary operators: operation with only one operand. i.g. delete, typeof, void...
+		Unary operators: operation with only one operand. e.g. delete, typeof, void...
 		Relational operators: compares its operands and returns a Boolean value based on whether the comparison is true.
 			in: returns true if the specified property is in the specified object.
 			instanceof: returns true if the specified object is of the specified object type.
@@ -288,12 +288,12 @@ Functions
 			Avoid polluting the global namespace: If some initiation code won't need to be use again, use the IIFE pattern. Cause an app could include many functions and global variables from different source files.
 			Execute an async function: An async IIFE allows you to use await and for-await.
 			The module pattern: create private and public variables and methods.
-				i.g. const something = (param) => ((paramCopy) => { any var or method here is private })(param);
+				e.g. const something = (param) => ((paramCopy) => { any var or method here is private })(param);
 			For loop with var before ES6: before "let" and "const" this could be seen (old code) to replace the function scope variables.
 
 	Arguments Object
 		"arguments" is an array-like object accessible inside functions that contains the values of the arguments passed to that function.
-			i.g. function name (a, b, c) {arguments[0] = a; arguments[1] = b; arguments[2] = c}
+			e.g. function name (a, b, c) {arguments[0] = a; arguments[1] = b; arguments[2] = c}
 		local variable available within all non-arrow functions.
 		a function of indefinite arity is a variadic function. The arguments object is useful for variadic functions.
 		If a function has no rest, default, or destructured parameters, arguments[i] can be use to sync the new value of parameters.
@@ -411,7 +411,7 @@ The "this" keyword
 
 	Function Borrowing
 		Function borrowing allows us to use the methods of one object on a different object without having to make a copy of that method and maintain it in two separate places.
-		It is accomplished through the use of call(), apply() or bind(). i.g. you have a class Dog with the method bark(), and you create a class Cat. After an instance of Cat is made, the Cat object could bark() with the use of:
+		It is accomplished through the use of call(), apply() or bind(). e.g. you have a class Dog with the method bark(), and you create a class Cat. After an instance of Cat is made, the Cat object could bark() with the use of:
 			call: dogObject.bark.call(catObject)
 			apply: dogObject.bark.apply(catObject)
 			bind: let catBark = dogObject.bark.bind(catObject); catBark();
@@ -527,7 +527,7 @@ Asyncronous JS
 					will run as early as they can be scheduled after the specified time has passed, however, OS scheduling or the running of other callbacks may delay them.
 					Technically, the poll phase controls when timers are executed. When the event loop enters the poll phase it will wait (if queue is empty) for the number of ms remaining until the soonest timer's threshold is reached.
 				pending callbacks: executes I/O callbacks deferred to the next loop iteration.
-					This phase executes callbacks for some system operations. i.g. some OS want to wait to report errors, this will be queued to execute in the pending callbacks phase.
+					This phase executes callbacks for some system operations. e.g. some OS want to wait to report errors, this will be queued to execute in the pending callbacks phase.
 				idle, prepare: only used internally.
 				poll: retrieve new I/O events; execute I/O related callbacks (almost all); node will block here when appropriate.
 					The poll phase has two main functions:
