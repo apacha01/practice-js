@@ -646,9 +646,199 @@ Web Workers API
 
 *****************************************************************************************************************************************************
 Classes
-	
+	template for creating objects. They encapsulate data with code to work on that data. Classes in JS are built on prototypes but also have some syntax and semantics that are unique to classes.
 
+Defining classes
+	Classes are in fact "special functions"
+	a class can be defined in two ways:
+		class declaration: class ClassName {...}
+		class expression:
+			anonymous class: const ClassName = class {...}
+			named class: const ClassName = class ClassName2 {...}
+	class declarations have the same temporal dead zone restrictions as "let" or "const" and behave as if they are not hoisted.
+
+Class body
+	The body of a class is executed in strict mode even without the "use strict" directive.
+	A class element can be characterized by three aspects:
+		Kind: Getter, setter, method, or field
+		Location: Static or instance
+		Visibility: Public or private
+	within the body, you can access the object being created through this and access the class that is called with new
+
+Methods
+	Methods are defined on the prototype of each class instance and are shared by all instances.
+
+Field declarations
+	Class fields are similar to object properties, not variables, so we don't use keywords such as const to declare them.
+	the fields can be declared with or without a default value. Fields without default values default to undefined.
+
+Static methods and fields
+	The static keyword defines a static method or field for a class. Static properties (fields and methods) are defined on the class itself instead of each instance.
+
+Inheritance
+	The "extends" keyword is used in class declarations or class expressions to create a class as a child of another constructor
+	The "super" keyword can also be used to call corresponding methods of super class.
+
+Evaluation order
+	When a class declaration or class expression is evaluated, its various components are evaluated in the following order:
+		1 extends (if present) is first evaluated. It must evaluate to a valid constructor function or null, or a TypeError is thrown.
+		2 constructor is extracted (default if not present).
+		3 class elements' property keys are evaluated in order of declaration. If the property key is computed, the computed expression is evaluated, with the "this" value set to the "this" value surrounding the class (not the class itself). None of the property values are evaluated yet.
+		4 methods and accessors are installed in the order of declaration. Instance methods and accessors are installed on the prototype, and static ones are installed on the class itself. Private instance methods and accessors are saved to be installed on the instance directly later.
+		5 The class is now initialized with the prototype specified by extends and implementation specified by constructor. For all steps above, if an evaluated expression tries to access the name of the class, a ReferenceError is thrown because the class is not initialized yet.
+		6 The class elements' values are evaluated in the order of declaration:
+			For each instance field (public or private), its initializer expression is saved and evaluated during instance creation, at the start of the constructor (for base classes) or immediately before the super() call returns (for derived classes).
+			For each static field (public or private), its initializer is evaluated with "this" set to the class itself, and the property is created on the class.
+			Static initialization blocks are evaluated with "this" set to the class itself.
+		7 The class is now fully initialized and can be used as a constructor function.
+
+Constructor
+	special method for creating and initializing an object created with a class (can only be one).
+	A constructor can use the super keyword to call the constructor of the super class.
+	constructor cannot be async, or generator.
+	enables you to provide any custom initialization before any other methods can be called.
+	if no constructor is defined, a default constructor will be supplied (if base class, the default is empty, if derived class, the default calls the parent constructor passing along any arguments that were provided).
+	Using new on a class goes through the following steps:
+		if derived class, constructor body before the super() call is evaluated. This part should not access "this" 'cause it's not yet initialized.
+		if derived class, super() call is evaluated, which initializes the parent class through the same process.
+		The current class's fields are initialized.
+		The constructor body after the super() call (or entire body, if base class) is evaluated.
+	methods and the prototype chain are already initialized on "this" before the constructor is executed. However, if those methods use "this", the this will not have been fully initialized yet.
+	constructor method may have a return value. Base classes may return anything, derived classes must return an object or undefined, or a TypeError will be thrown.
+	If parent class constructor returns an object, it will be used as the "this" value on which class fields of the derived class will be defined. This trick is called "return overriding", it allows a derived class's fields (including private ones) to be defined on unrelated objects.
+
+Different Inheritances
+	Extends
+		use the keyword "extends".
+		Any constructor that can be called with new and has the prototype property can be parent class.
+		The prototype property of the ParentClass must be an Object or null.
+		extends sets the prototype for both ChildClass and ChildClass.prototype.
+		The right-hand side of extends doesn't have to be an identifier, but any expression that evaluates to a constructor.
+		The "this" value in the extends expression is the "this" surrounding the class definition
+		the base class may return anything from constructor but the derived class must return an object or undefined, or TypeError will be thrown.
+		Subclassing built-ins causes non-negligible performance and security impacts. A better way to extend built-ins is to use composition.
+	Composition:
+		Inheritance often leads to the circle-ellipse problem, because neither type perfectly entails the behavior of the other
+		In general it's better to use composition instead.
+		Composition means that a class has a reference to an object of another class, and only uses that object as an implementation detail.
+		This means more code duplication, but also means that the ChildClass is not strongly coupled to the ParentClass, and does not easily break if the ParentClass is changed, avoiding the semantic issues of built-in subclassing.
+	Extending null: extends null was designed to allow easy creation of objects that do not inherit from Object.prototype. However, it's not possible to construct such a class in practice using any constructor implementation that doesn't return an object. Instead, you need to explicitly return an instance from the constructor.
+	Extending Object: All JavaScript objects inherit from Object.prototype by default, but the only difference from not writing extends at all is that the constructor itself inherits static methods from Object (although there's no value in inheriting these static methods).
+	Extending Built-in classes: Built-in classes are extendable also. but there's no static inheritance in built-ins. Built-in objects have their own static methods, for instance Object.keys, Array.isArray etc. Normally, when one class extends another, both static and non-static methods are inherited. But built-in classes are an exception. They don’t inherit statics from each other.
+	Species
+		The species pattern lets you override default constructors.
+		Symbol.species symbol lets you return a parent object, instead of the child object in some methods.
+		Example:
+			class MyArray extends Array {
+				// Overwrite species to the parent Array constructor
+				static get [Symbol.species]() {
+					return Array;
+				}
+			}
+			const a = new MyArray(1, 2, 3);
+			const mapped = a.map((x) => x * x);
+			console.log(mapped instanceof MyArray); // false
+			console.log(mapped instanceof Array); // true
+
+Mix-ins
+	Abstract subclasses or mix-ins are templates for classes.
+	A mixin is a class with methods to be used by other classes without needing to inherit from it, since a class can only inherit from one class.
+	A function with a superclass as input and a subclass extending that superclass as output can be used to implement mix-ins:
+		Example:
+			const calculatorMixin = (Base) =>
+				class extends Base {
+					calc() {}
+				};
+			A class that uses these mix-ins can then be written like this:
+				class Foo {}
+				class Bar extends calculatorMixin(randomizerMixin(Foo)) {}
+	Another way to implement mix-ins is with Object.assign():
+		// mixin
+		let sayHiMixin = {
+			sayHi() { alert(`Hello ${this.name}`); }
+		};
+		// usage:
+		class User {
+			constructor(name) { this.name = name; }
+		}
+		Object.assign(User.prototype, sayHiMixin);
+		new User("Dude").sayHi(); // Hello Dude!
+	Mixins can make use of inheritance inside themselves:
+		let sayMixin = {
+			say(phrase) { alert(phrase); }
+		};
+		let sayHiMixin = {
+			sayHi() { super.say(`Hello ${this.name}`); }
+		}
+		Object.setPrototypeOf(sayHiMixin, sayMixin);
+		Object.assign(User.prototype, sayHiMixin);
+		new User("Dude").sayHi(); // Hello Dude!
+
+Private and protected properties and methods
+	In order to hide inner details we’ll use special syntax of the language and conventions.
+	Internal and external interface
+		In OOP properties and methods are split into two groups:
+			Internal interface – methods and properties, accessible from other methods of the class, but not from the outside.
+			External interface – methods and properties, accessible also from outside the class.
+		An internal interface is used for the object to work, its details use each other. But from the outside it's closed so that no one can reach those. Details are hidden and inaccessible. We can use its features via the external interface.
+		In JS theres only public and private object fields (protected doesn't exist, so a convention it's used instead).
+	Read-only property
+		It sometimes happens that a property must be set at creation time, and never modified.
+		To do so, we only need to make getter, but not the setter.
+	Protected:
+		Not actually implemented in JS, they are emulated.
+		Protected properties are usually prefixed with an underscore (_).
+		BUT protected fields are inherited, if we inherit nothing prevents us from accessing them from the methods of the new class. So protected fields are naturally inheritable unlike private ones.
+	Private (quite recent, not suported in JS engines and requires ):
+		Privates should start with #. They are only accessible from inside the class.
+		Private fields do not conflict with public ones. We can have both private "#name" and public "name" fields at the same time.
+		Private fields are not available as this[name]
+		But if we inherit from a class, then we’ll have no direct access to #property. You'll have to rely on getters/setters.
+
+Static initialization blocks
+	Static initialization blocks are declared within a class. It contains statements to be evaluated during class initialization.
+	allows flexible initialization of static properties, including the evaluation of statements during initialization, while granting access to the private scope.
+	Multiple static blocks can be declared, and these can be interleaved with the declaration of static fields and methods (all static items are evaluated in declaration order).
+	Syntax: just use ---> static { ... }
+	A class can have multiple "static {}" initialization blocks in its body. These are evaluated, along with any interleaved static field initializers, in the order they are declared.
+	Any static initialization of a super class is performed first, before that of its sub classes.
+	The scope of the variables declared inside the static block is local to the block ("var" declarations are not hoisted).
+	"this" inside a static block refers to the constructor of the class.
+	super.property can be used to access static properties of the super class.
+	The statements are evaluated synchronously. You cannot use await or yield in this block.
+	initialization blocks can refer to field values above it, but not below it.
+
+instanceof operator:
+	The instanceof operator allows to check whether an object belongs to a certain class. It also takes inheritance into account.
+	It returns true if obj belongs to the Class or a class inheriting from it (therefor being able to be an instance of multiple classes, like arrays wich are instanceof Array && instaceof Object).
+	by the logic of instanceof, the prototype actually defines the type, NOT the constructor function (so changing the prototype of a class after an instance was created will lead to obj instanceof Class returning false).
+	The algorithm of "instanceof":
+		If there’s a static method Symbol.hasInstance, then just call it: Class[Symbol.hasInstance](obj). It should return either true or false.
+		If there's no Symbol.hasInstance, obj instanceof Class checks whether Class.prototype is equal to one of the prototypes in the obj prototype chain. if any answer is true, return true, otherwise, if we reached the end of the chain, return false.
+	there’s also a method objA.isPrototypeOf(objB), (true if objA is somewhere in the chain of prototypes for objB), so "obj instanceof Class" can be rephrased as Class.prototype.isPrototypeOf(obj).
+	Bonus: toString as replacement of insatnceof
+		Symbol.toStringTag: The behavior of Object.toString can be customized using a special object property Symbol.toStringTag
+			let user = { [Symbol.toStringTag]: "Pikachu" };
+			{}.toString.call(user) ); // [object Pikachu]
+		So we have “typeof on steroids” that not only works for primitives, but also for built-in objects and can even be customized.
 *****************************************************************************************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
