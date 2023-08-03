@@ -824,12 +824,118 @@ instanceof operator:
 *****************************************************************************************************************************************************
 
 
+*****************************************************************************************************************************************************
+Iterators
+	An iterable is something that can be iterated over.
+	An iterator is an object that performs iteration over a sequence. In JS, is an object that implements the iterator protocol.
+	Being iterable doesn't always has to do with the default setup in JavaScript, by implementing the iterable protocol you can make a non-iterable data type iterable. You define an @@iterator method on it which, when called, returns an iterator object following the iterator protocol.
+	The interpreter uses this iterator object to perform iteration over the given data type.
+	Iterator Protocol:
+		set of rules which must be obeyed by an object in order for it to be called an iterator.
+			the object must have a next() method.
+			the next() method shall return an object with the following two properties:
+				done: a Boolean value indicating whether it has reached its last value.
+				value: holds the next value in a given sequence.
+	Itrator object:
+		you call iter.next() to get the next value in an object {value: x, done: false}.
+		Once finished, you still need to iterate once more to be done -> {value: undefined, done:true} THE LAST VALUE WILL NOT GIVE done: true.
+		subsequent calls of iter.next() keep returning the same object as the last one -> {value: undefined, done:true}.
+	@@iterator (or [Symbol.iterator]()):
+		Many data classes in JavaScript have their own defined mechanism to create iterator objects.
+		This mechanism is the @@iterator() method. Classes define an @@iterator() method that returns an iterator object for those classes instances.
+	Any construct that requires an iterable such as the for...of loop or the spread operator ..., calls the @@iterator() method defined on the iterable. This is a convention set by ECMAScript 6.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------- Extra: Exercise
+Construct a function makeIterator() that takes in an array and returns an iterator to iterate over it.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+first working answer:
+function makeIterator(arr) {
+	let it = {index: 0,
+			  response(v, d) {return {value:v, done:d}}
+			 };
+	function next(){
+		try {
+			let ret = this.response(arr[this.index], false);
+			this.index += 1;
+			return ret;
+		} catch (e) {
+			return this.response(undefined, true);
+		}
+	}
+	it.next = next;
+	return it;
+}
 
+https://www.codeguage.com/courses/advanced-js/iteration-iterators -> answer:
+function makeIterator(arr) {
+	var i = 0;
+	return {
+		next: function() {
+			if (i > arr.length - 1)
+				return {value: undefined, done: true}
+			return {value: arr[i++], done: false}
+		}
+	}
+}
+-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+Iterables
+	Any object that conforms to the iterable protocol is considered to be an iterable.
+	The iterable protocol states that the object must have an @@iterator() method which returns an iterator (following the iterator protocol).
+	Knowing what iterables are, it's better to say that the spread operator takes an iterable and converts it into individual elements.
+		First it calls @@iterator() and gets an iterator.
+		Then it uses it to retrieve the elements of the iterable one-by-one until done property is false.
 
-
-
-
+Generators
+	Generators are functions that return iterators to lazily generate an iterable sequence. The idea is to NOT create the desired sequence all at once, but rather generate it element-by-element, hence the "lazily generate".
+	Example:
+		function positiveInts(n) {
+			var i = 1;
+			var max = (n < 1 || typeof n !== "number") ? 1 : n;
+			return {
+				next: function() {
+					if (i > max) return {value: undefined, done: true}
+					return {value: i++, done: false}
+				}
+			}
+		}
+		This generator doesn't allow for direct iteration on the sequence it defined ('cause it doesn't have an @@iterator method), but it helps understand the idea.
+	A generator simply defines an iterable sequence with the help of an iterator object. If a generator doesn't operate on an iterator then, by the specification, it isn't a generator.
+	Generators in JS:
+		With ES6, JS provides a bunch of tools and convenient syntax to create generators that bring on a new model of execution into the language.
+		JavaScript introduces a special type of function: generator function (created with an asterisk). e.g: fuction* funcName() {...}
+		Within the function body you use the "yield" keyword. This is used to pause and resume a generator function. The "yield" keyword basically defines a value in the iterable sequence defined by the generator. Each yielded value is a value of the sequence, in the order it appears in the generator. e.g:
+			function* seq() {yield 1; yield 2; yield 3;}
+			let s = seq();
+			s.next() // {value: 1, done: false}
+			...
+			s.next() // {value: undefined, done: true}
+		This creates an iterable sequence, so the iterator returned by function* x() has the @@iterator method defined.
+		How it works:
+			The interpreter realises that it is a generator function's call and likewise returns an iterator right away (the body is not executed).
+			This returned iterator runs over the yield values one-by-one each time its next() method is called.
+			When the next() method is called on the iterator, execution begins inside the generator and goes upto the next yield keyword, at which point, it pauses (this can be checked by adding a console.log() before every yield an it will only be printed after next() is called).
+			The moment yield is encountered, execution pauses, this point is saved internally within the generator function.
+			It continues until the function ends, and then the value property of the to-be-returned object by .next() is set to undefined and since the function has completed i.e we are out of yield, done is set to true.
+			Basically:
+				The next() method serves to resume execution inside a generator.
+				The yield keyword serves to pause execution inside a generator.
+		Arguments to next() - "yield" taking values
+			Each time an argument is provided to .next(), it replaces the "whole corresponding yield expression" with that argument. Since it's a yield expression it'll only work after the first .next(), since the first one doesn't start from a yield but the beginning of the function. eg:
+				var x; function* gen() { x = yield 30; }
+				gen().next() -> {value: 30, done: false }
+				.next(10) -> REPLACES THE WHOLE YIELD EXPRESSION function* gen() { x = ~~yield 30~~ 10; } -> x === 10 after the second .next()
+	Other methods beside next(): return() & throw()
+		The return() method simply returns the iterator with a given value. Returning means that we are done iterating, so done is set to true. No matter how long the sequence remains, it is terminated with the value provided to the method.
+		The throw() method simply resumes execution inside the generator and throws an error in there, where the corresponding yield dwells. So throw() resumes execution and acts as if a throw keyword (with the argument passed, undefined if no argument is used) is put in the location where the previous yield expression. If there's a try/catch to catch that error, it continues to work, otherwise the generator is closed (done: true).
+	Delegating generators
+		yield* keyword: it's just syntactic sugar to simplify working with an iterable. e.g: arr[1,2,3] yield* arr; (like ... but with yield).
+		The yield* keyword allows for the use of the iterator returned by a generator inside another generator, this is called generator delegation.
+		Example:
+			function* positiveInts(n) {// normal for loop to return positive ints up to n}
+			function* negativeInts(n) {// normal for loop to return negative ints up to -n}
+			function* seq() {yield* positiveInts(5); yield* negativeInts(5);} -> 1 2 3 4 5 -1 -2 -3 -4 -5, {value: undefined, done:true}
+*****************************************************************************************************************************************************
 
 
 
