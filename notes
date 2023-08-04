@@ -938,7 +938,110 @@ Generators
 *****************************************************************************************************************************************************
 
 
+*****************************************************************************************************************************************************
+Modules
+	Modules encapsulate code and exposes all of it to other files. Generally used to break code into separate files to make it more maintainable.
+	A module may contain a class or a library of functions for a specific purpose.
+	Basically a module is just a file. One script is one module.
 
+CommonJS Modules (normally used in backend with node, although node supports ESModules)
+	the original way to package JavaScript code for Node.js.
+	Sometimes these modules will be written with a .cjs extension.
+	the js file has a module object with info about the file itself. Within that object it's the exports property.
+	to export a function/variable just add it to the "module.exports" object (e.g. module.exports.someFunction = someFunction).
+		if theres only one thing to export you could just set the module.exports property to be that one thing (the default export).
+	to import a function/variable the "require('path')" is used (e.g. let exports = require('path/to/file.js'); exports.someFunction()).
+	to import a function/variable directly without the exports object the destructure method is used: const {someFunction} = require('path');
+		if theres only one thing to import the curly braces are skipped (the default import).
+	exports can be renamed with the following syntax:
+		const {someFunction: someOtherFunction} = require('path');
+	How does require work?
+		The module loading mechanism in Node.js is caching the modules on the first require call. So every time you use requre('path') the same instace is returned (so modules are singleton-like and have the same state across the app).
+		If the identifier passed to require() isn't a native module or a file reference (like /, ../, ./, etc), then node'll look for installed modules.
+
+ESModules (normally used in frontend)
+	a standard that was introduced with ES6 (2015).
+	Sometimes these modules will be written with a .mjs extension.
+	Modules can load each other and use the keywords "export" and "import" to interchange functionality:
+		export: labels variables and functions that should be accessible from outside the current module.
+		import: allows the import of functionality exported from other modules.
+	Syntax
+		export: export function/variable
+		import: import {function/variable} from 'path'
+	The "import" loads the module by path relative to the current file, or absolute if it starts with "/...".
+	IMPORTANT: Modules work only via HTTP(s), not locally.
+	Core features
+		Modules always work in strict mode.
+		Each module has its own top-level scope. Modules should export what they want to be accessible from outside and import what they need.
+			Extra: In the browser you can make a variable window-level global by explicitly assigning it to a window property, e.g. window.user = "John". Then all scripts will see it, both with type="module" and without it.
+		A module code is evaluated only the first time when imported.
+		import.meta
+			The object import.meta contains the information about the current module.
+			Its content depends on the environment. In the browser, it contains the URL of the script.
+		In a module, “this” is undefined.
+	Browser specific features
+		Module scripts are deferred in browsers
+			downloading external modules doesn’t block HTML processing, they load in parallel with other resources.
+			module scripts wait until the HTML document is fully ready and then runs.
+			relative order is maintained: scripts that go first in the document, execute first.
+		Async works on inline scripts (for non-module scripts, the async attribute only works on external scripts).
+		import must get either a relative or absolute URL. Modules without any path are called “bare” modules (and aren't allowed)
+		Compatibility: “nomodule”
+			Old browsers do not understand type="module". Scripts of an unknown type are just ignored.
+			It’s possible to provide a fallback using the nomodule attribute.
+		External scripts that are fetched from another origin require CORS headers, otherwise, the script won't execute. (see extra below for CORS)
+	import & export
+		you can export before the declaration (e.g. export function x(){}) or separetly from the declaration (e.g. function x(){} export {x}).
+		"as" keyword:
+			import {function} as x from 'path' -> allows to use function as x (e.g. x()).
+			export {function} as x -> allows to be exported as x.
+		you can avoid to import explicitly (curly braces {/*imports*/}) by using * and the as keyword (e.g. import * as <object> from 'path').
+		export default function -> import it without curly braces (there may be only one export default per file). import needs curly braces for named exports but doesn’t need them for default exports. If this is done, since the default is set at export, the name can be anything: import hi from 'path';
+		default
+			export default alternative: export {function as default};
+			if theres multiple exports an one default export then you import like: import {default as Class, function, function2} from 'path';
+			if imported with *: import * as x from 'path'; x.default contains the default export.
+		Re-export
+			“Re-export” syntax export ... from ... allows to import things and immediately export them (possibly under another name).
+			helpful to allow exports from a single file all together: import {functiona, functinob, functionc} from 're/export/file.js' -> where functiona is declared in filea, functionb in fileb, etc.
+				named exports: export {x} from 'path';
+				default exports: export {default as x} from 'path';
+	Dynamic imports
+		The import(module) expression loads the module and returns a promise that resolves into a module object that contains all its exports. It can be called from any place in the code.
+		Dynamic imports work in regular scripts, they don’t require script type="module".
+		Although import() looks like a function call, it’s a special syntax that just happens to use parentheses.
+		Examples:
+			let {f1, f2} = await import('./functions.js');
+			import('path').then(obj => <module object>).catch(err => <loading error, e.g. if no such module>);
+			if its an "export default":
+				let obj = await import('./module.js');
+				let f = obj.default;
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------- Extra: CORS
+What is CORS
+	Cross-origin requests (those sent to another domain (even a subdomain) or protocol or port) require special headers from the remote side.
+	That policy is called “CORS”: Cross-Origin Resource Sharing.
+
+Safe requests
+	For a request to be consider safe it must satisfy some conditinos (see: https://javascript.info/fetch-crossorigin#safe-requests).
+	If a request is cross-origin, the browser always adds the Origin header to it.
+	The server can inspect the Origin and, if it agrees to accept such a request, add a special header Access-Control-Allow-Origin to the response. That header should contain the allowed origin or a star *. Then the response is successful, otherwise it’s an error.
+	For cross-origin request, by default JavaScript may only access so-called “safe” response headers, accessing any other response header causes an error.
+	To grant JavaScript access to any other response header, the server must send the Access-Control-Expose-Headers header. It contains a comma-separated list of unsafe header names that should be made accessible.
+
+"Unsafe" Requests
+	The essential difference is that safe requests were doable since old times, while unsafe were impossible for browsers for a long time.
+	So to avoid misunderstandings, any “unsafe” request (that couldn’t be done in the old times) the browser doesn't make them right away. First it sends a so-called “preflight” request, to ask for permission.
+	A preflight request uses the method OPTIONS, no body and three headers.
+	If the server agrees to serve the requests, then it should respond with empty body, status 200 and some headers:
+		Access-Control-Allow-Origin: must be * or the requesting origin.
+		Access-Control-Allow-Methods must have the allowed method.
+		Access-Control-Allow-Headers must have a list of allowed headers.
+		Access-Control-Max-Age: may specify a number of seconds to cache the permissions (so browser won’t have to send a preflight for subsequent requests that satisfy given permissions).
+	Note: Preflight request occurs “behind the scenes”, it’s invisible to JavaScript.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+*****************************************************************************************************************************************************
 
 
 
