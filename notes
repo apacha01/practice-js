@@ -1044,15 +1044,70 @@ Safe requests
 *****************************************************************************************************************************************************
 
 
+*****************************************************************************************************************************************************
+Memory Management (MM)
+	JavaScript automatically allocates memory when objects are created and frees it when they are not used anymore (garbage collection).
 
+Memory life cycle (MLC)
+	Regardless of the language, the MLC is pretty much always the same:
+		Allocate the memory you need
+		Use the allocated memory (read, write)
+		Release the allocated memory when it is not needed anymore
+	Allocation:
+		Mostly implicit: 'const a = 123' allocates memory for a number, 'const a = "hi"' allocates memory for a string, etc...
+	Using the allocated memory:
+		Explicit: done by reading or writing the value of a variable or an object.
+	Release when the memory is not needed anymore:
+		The hardest part of this stage is determining when the allocated memory isn't needed anymore. That's why most issues occur at this phase.
+		JavaScript uses a form of automatic MM known as garbage collection.
 
+Garbage Collection
+	The purpose of a garbage collector (GC) is to monitor memory allocation and determine when the allocated memory is no longer needed and reclaim it.
+	The general problem of automatically finding whether some memory "is not needed anymore" is undecidable. As a consequence, GCs implement a restriction of a solution to the general problem.
+	References
+	The main concept that garbage collection algorithms rely on is the concept of reference.
+	Within the context of MM, an obj is said to reference another one if the former has access to the latter (either implicitly or explicitly).
+	Reference-counting garbage collection:
+		The most naive garbage collection algorithm.
+		Reduces the problem from 'whether or not an obj is still needed' to 'determining if an obj still has any other obj referencing it'.
+		An object is said to be "garbage", or collectible if there are zero references pointing to it
+		Note: no modern browser uses reference-counting for garbage collection anymore.
+		Limitations: circular references. e.g. two objs in a function with properties that reference one another, i.e. a cycle. They'll go out of scope after the function call has completed. At that point they become unneeded and their allocated memory should be reclaimed. But (for obvius reasons) this algorithm doesn't garbage collect them.
+	Mark-and-sweep algorithm
+		Reduces the definition of 'an object is no longer needed' to 'an object is unreachable'.
+		This algorithm uses a set of objects called roots. In JS, root is the global object. Periodically, the GC starts from these roots and finds all objects that are referenced from these roots, then all objects referenced from these, etc... and marks them. Thus it will find all reachable objects (marked ones) and collect all non-reachable objects (non marked ones).
+		Note: Currently, all modern engines ship a mark-and-sweep garbage collector.
+		Improvement over Reference-counting GC: cycles are no longer a problem. Once you leave the function, the two objs pointing at each other are unreachable from the global object, and therefore collected.
+	Optimizations:
+		Generational collection: objects are split into two sets: “new ones” and “old ones”. Many objects have a short life span: appear, do their job and die, so track new objects and clear the memory from them if that’s the case. Those that survive for long enough become “old” and are examined less often.
+		Incremental collection: if there are many objects, and we try to walk and mark the whole object set at once, it may take some time and introduce visible delays. So the engine splits the whole set of existing objects into multiple parts. And then clear these parts one after another. This requires some extra bookkeeping to track changes.
+		Idle-time collection: the garbage collector tries to run only while the CPU is idle, to reduce the possible effect on the execution.
 
+Configuring an engine's memory model
+	JavaScript engines typically offer flags that expose the memory model.
+	Node.js:
+		max amount of available heap memory can be set with a flag: node --max-old-space-size=6000 index.js
+		expose the garbage collector for debugging memory issues using a flag: node --expose-gc --inspect index.js
+	This configuration may not be available in browsers, and even less so for web pages (via HTTP headers, etc.).
 
+Data structures aiding memory management
+	JS offers several data structures that indirectly observe garbage collection and can be used to manage memory usage.
+	WeakMaps and WeakSets
+		This two got the name from the concept of weakly held values. If x is weakly held by y, although you can access the value of x via y, the mark-and-sweep algorithm won't consider x as reachable if nothing else strongly holds to it.
+		The keys of this data structures can be GCed as long as nothing else in the program is referencing the key (in WeakMap the values would then be eligible for GC as well). This is possible because WeakMap/Set do not store the key as a reference (remember this two can only store objs or symbols) but ephemorons (see extra "Ephemerons" below to understand better how weak maps/sets work).
+	WeakRefs and FinalizationRegistry
+		A WeakRef is a weak reference to an obj that allows the obj to be GCed, while still retaining the ability to read the obj's content during its lifetime. A strong reference (e.g. a var which value is an obj) prevents the GC from marking an object as eligible for collection.
+		FinalizationRegistry provides a mechanism to observe garbage collection. It allows you to register objects and be notified when they are garbage collected.
+		Note: this two offer direct introspection into the GC machinery. Avoid using them where possible 'cause the runtime semantics are almost completely unguaranteed.
 
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------- Extra: Ephemerons
+Info taken from: https://dl.acm.org/doi/pdf/10.1145/263700.263733 and https://developer.mozilla.org/en-US/docs/Web/JavaScript/Memory_Management
 
+Ephemerons are a new class of objects that are "almost collectable", i.e. a data structure.
+Ephemerons are similar to weak pairs, but an object in an ephemeron’s key field may be classed as “almost collectable” even if it is reachable from the epehemeron’s value fields (which means no circular references within the weak pair).
+Ephemerons are a refinement of weak pairs that solve the “unreachable” problem. The first slot of an ephemeron is used to hold the key of a property, while the second slot holds the value, but the slots are neither “weak” nor “strong” in the previous sense.
 
-
-
-
-
-
+Using ephemerons the key-value pairs are stored as a "refinement of a weak pair" that classifies the key as "almost collectable" (if nothing else references it). This avoids a circular reference in the case of the value of a key pointing to it's own key, 'cause in that case, the value holds a reference to the key and is strongly held in the map which would prevent it from being GCable (remember that keys are weakly held, but the values aren't). If a WeakMap where to store the objs as references, it would create a circular reference and make both the key & value ineligible for GC, even when nothing else references the key, because if the key is GCed, then value.key would point to a non-existent address, which is not legal.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+*****************************************************************************************************************************************************
